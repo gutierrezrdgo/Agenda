@@ -344,3 +344,150 @@ footer img{width:52px;height:52px}
   .note-section p{font-size:8vw}
   footer{grid-template-columns:1fr;padding:46px 20px 58px;gap:14px}
 }
+
+
+/* Appointment slot system */
+.date-field{
+  display:block;
+  max-width:520px;
+  margin-bottom:52px;
+}
+.slot-groups{
+  display:grid;
+  gap:44px;
+}
+.slot-group{
+  border-top:1px solid var(--ink);
+  padding-top:16px;
+}
+.slot-group-head{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  margin-bottom:18px;
+}
+.slot-group-head span{
+  display:block;
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  font-weight:700;
+}
+.slot-group-head p{
+  margin:7px 0 0;
+  max-width:540px;
+  font-family:Georgia,serif;
+  font-size:15px;
+  line-height:1.45;
+  color:var(--muted);
+}
+.slot-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.slot-group:last-child .slot-grid{
+  grid-template-columns:minmax(0,1fr);
+  max-width:520px;
+}
+.slot-card{
+  min-height:188px;
+  padding:18px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.18);
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease,opacity .18s ease;
+}
+.slot-card.available:hover{
+  transform:translateY(-3px);
+  border-color:var(--ink);
+}
+.slot-card.selected{
+  background:var(--yellow);
+  border-color:var(--ink);
+}
+.slot-card.special:not(.booked):not(.selected){
+  background:var(--pink);
+}
+.slot-card.booked{
+  cursor:not-allowed;
+  background:rgba(21,21,21,.045);
+  color:#8d8a83;
+  border-color:rgba(21,21,21,.14);
+  opacity:.72;
+}
+.slot-card.booked.special{
+  background:rgba(233,185,199,.26);
+}
+.slot-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.slot-top strong{
+  font-family:Georgia,serif;
+  font-size:37px;
+  line-height:1;
+  font-weight:400;
+}
+.slot-top span{
+  padding-top:4px;
+  font-size:8px;
+  line-height:1.3;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  text-align:right;
+}
+.slot-special-copy{
+  margin-top:28px;
+}
+.slot-special-copy b{
+  display:block;
+  font-size:8px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.slot-special-copy p{
+  margin:4px 0;
+  font-family:Georgia,serif;
+  font-size:14px;
+  line-height:1.35;
+}
+.slot-special-copy em{
+  display:block;
+  margin-top:11px;
+  font-family:Arial,Helvetica,sans-serif;
+  font-style:normal;
+  font-size:9px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.slot-regular-copy{
+  margin:30px 0 0;
+  font-family:Georgia,serif;
+  font-size:15px;
+  line-height:1.4;
+}
+.summary-main p:last-child{
+  border-bottom:0;
+}
+
+@media(max-width:900px){
+  .slot-grid{grid-template-columns:1fr 1fr}
+  .slot-group:last-child .slot-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:620px){
+  .date-field{margin-bottom:42px}
+  .slot-groups{gap:36px}
+  .slot-grid{grid-template-columns:1fr}
+  .slot-card{min-height:166px;padding:17px}
+  .slot-top strong{font-size:34px}
+  .slot-special-copy{margin-top:24px}
+}
