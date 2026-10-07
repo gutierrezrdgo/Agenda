@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
-
-const WHATSAPP_NUMBER = "528139600745";
+import "./styles/success-burst.css";
+import { SuccessBurst } from "./components/SuccessBurst";
+import { buildWhatsAppUrl } from "./lib/booking";
 
 const encounterTypes = [
   {
@@ -30,7 +31,7 @@ const slotGroups = [
   {
     id: "matutino",
     label: "MATUTINO",
-    note: "Antes de que empiece el resto del día.",
+    note: "Para empezar el día con un espacio propio.",
     slots: [
       {
         id: "0700",
@@ -48,7 +49,7 @@ const slotGroups = [
   {
     id: "vespertino",
     label: "VESPERTINO",
-    note: "El tramo habitual de la tarde.",
+    note: "La tarde también puede tener su propio espacio.",
     slots: [
       {
         id: "1600",
@@ -66,7 +67,7 @@ const slotGroups = [
   {
     id: "global-access",
     label: "GLOBAL ACCESS",
-    note: "After hours. Para quienes necesitan un horario fuera del bloque habitual.",
+    note: "After hours · Una opción fuera del horario habitual.",
     slots: [
       {
         id: "2230",
@@ -98,6 +99,8 @@ function App() {
   const [slotId, setSlotId] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
+  const [prepared, setPrepared] = useState(false);
+  const [burst, setBurst] = useState({ id: 0, active: false });
 
   const selectedEncounter = encounterTypes.find((item) => item.id === encounter);
   const selectedModality = modalities.find((item) => item.id === modality);
@@ -113,33 +116,20 @@ function App() {
 
   const ready = Boolean(date && selectedSlot && name.trim());
 
-  const openWhatsApp = () => {
-    if (!ready || !selectedSlot) return;
+  const requestUrl = ready
+    ? buildWhatsAppUrl({
+        name,
+        encounter: selectedEncounter,
+        modality: selectedModality,
+        formattedDate: formatDate(date),
+        slot: selectedSlot,
+        note,
+      })
+    : "";
 
-    const lines = [
-      "Hola, Dr. Rodrigo. Me gustaría solicitar un horario.",
-      "",
-      `Nombre: ${name.trim()}`,
-      `Encuentro: ${selectedEncounter.title} · ${selectedEncounter.duration}`,
-      `Modalidad: ${selectedModality.label}`,
-      `Fecha preferente: ${formatDate(date)}`,
-      `Horario: ${selectedSlot.time} h · ${selectedSlot.group}`,
-    ];
-
-    if (selectedSlot.special) {
-      lines.push(
-        `Modalidad de agenda: ${selectedSlot.packageLabel} reservadas en conjunto`,
-        `Costo: ${selectedSlot.price}`,
-        `Total mensual: ${selectedSlot.packageTotal}`
-      );
-    }
-
-    if (note.trim()) lines.push(`Nota: ${note.trim()}`);
-
-    lines.push("", "Entiendo que el horario queda confirmado cuando reciba respuesta.");
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+  const prepareRequest = () => {
+    setPrepared(true);
+    setBurst((previous) => ({ id: previous.id + 1, active: true }));
   };
 
   return (
@@ -160,13 +150,13 @@ function App() {
             <em>UNA SESIÓN.</em>
           </h1>
           <p className="hero-copy">
-            Elige el tipo de encuentro, modalidad, fecha y un horario disponible. Algunos horarios especiales se reservan como bloque mensual.
+            Una conversación empieza por encontrar un espacio. Elige tu horario; nosotros confirmamos personalmente los detalles.
           </p>
           <div className="hero-strip">
             <span>01 ENCUENTRO</span>
             <span>02 MODALIDAD</span>
-            <span>03 FECHA + SLOT</span>
-            <span>04 CONFIRMACIÓN</span>
+            <span>03 HORARIO</span>
+            <span>04 SOLICITUD</span>
           </div>
         </section>
 
@@ -174,7 +164,7 @@ function App() {
           <aside className="booking-intro">
             <span>01 / ENCUENTRO</span>
             <h2>¿QUÉ NECESITAS?</h2>
-            <p>No hace falta decidirlo con precisión clínica. Elige la opción que mejor describe el tipo de cita que buscas.</p>
+            <p>Un espacio para comenzar o continuar. Elige el tipo de encuentro que corresponde a tu proceso.</p>
           </aside>
 
           <div className="booking-flow">
@@ -183,7 +173,8 @@ function App() {
                 <button
                   key={item.id}
                   className={encounter === item.id ? "choice-card active" : "choice-card"}
-                  onClick={() => setEncounter(item.id)}
+                  onClick={() => { setEncounter(item.id); setPrepared(false); }}
+                  aria-pressed={encounter === item.id}
                   type="button"
                 >
                   <span>{item.eyebrow}</span>
@@ -205,7 +196,8 @@ function App() {
                     key={item.id}
                     type="button"
                     className={modality === item.id ? "modality active" : "modality"}
-                    onClick={() => setModality(item.id)}
+                    onClick={() => { setModality(item.id); setPrepared(false); }}
+                    aria-pressed={modality === item.id}
                   >
                     <span>{item.label}</span>
                     <small>{item.detail}</small>
@@ -226,7 +218,7 @@ function App() {
                   type="date"
                   min={minDate}
                   value={date}
-                  onChange={(event) => setDate(event.target.value)}
+                  onChange={(event) => { setDate(event.target.value); setPrepared(false); }}
                 />
               </label>
 
@@ -256,7 +248,8 @@ function App() {
                               selected ? "selected" : "",
                               slot.special ? "special" : "",
                             ].join(" ")}
-                            onClick={() => !booked && setSlotId(slot.id)}
+                            onClick={() => { if (!booked) { setSlotId(slot.id); setPrepared(false); } }}
+                            aria-pressed={selected}
                           >
                             <div className="slot-top">
                               <strong>{slot.time}</strong>
@@ -284,7 +277,7 @@ function App() {
               </div>
 
               <p className="microcopy">
-                Los horarios marcados como “apartado” no pueden seleccionarse. Elegir un slot especial implica solicitar las cuatro sesiones del mes en ese mismo horario y aceptar el total mensual indicado.
+                Los horarios apartados no se pueden seleccionar. Los slots especiales implican solicitar las cuatro sesiones del mes y el total indicado.
               </p>
             </div>
 
@@ -302,7 +295,7 @@ function App() {
                     placeholder="Tu nombre"
                     autoComplete="name"
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => { setName(event.target.value); setPrepared(false); }}
                   />
                 </label>
 
@@ -312,7 +305,7 @@ function App() {
                     rows="4"
                     placeholder="Algo que convenga saber antes de confirmar."
                     value={note}
-                    onChange={(event) => setNote(event.target.value)}
+                    onChange={(event) => { setNote(event.target.value); setPrepared(false); }}
                   />
                 </label>
               </div>
@@ -331,11 +324,31 @@ function App() {
             {selectedSlot?.special && <p>{selectedSlot.packageLabel} · {selectedSlot.packageTotal}</p>}
           </div>
           <div className="summary-action">
-            <button type="button" onClick={openWhatsApp} disabled={!ready}>
-              Solicitar horario por WhatsApp ↗
-            </button>
+            <div className="request-wrap">
+              {ready ? (
+                <a className="request-link" href={requestUrl} target="_blank" rel="noopener noreferrer" onClick={prepareRequest}>
+                  <span>Continuar en WhatsApp</span>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              ) : (
+                <button type="button" className="request-link" disabled>
+                  <span>Completa tu solicitud</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+              )}
+              {burst.active && (
+                <SuccessBurst key={burst.id} onComplete={() => setBurst((previous) => ({ ...previous, active: false }))} />
+              )}
+            </div>
+            <p className={"request-feedback" + (prepared ? " is-prepared" : "")} role="status" aria-live="polite">
+              {prepared
+                ? "Solicitud preparada. Revisa el mensaje en WhatsApp y pulsa enviar."
+                : "No se realiza ningún cobro ni se aparta el horario desde esta página."}
+            </p>
             <small>
-              La solicitud no queda confirmada hasta recibir respuesta. En slots especiales, seleccionar el horario implica solicitar el bloque completo de cuatro sesiones del mes.
+              La cita se confirma personalmente después de recibir tu mensaje. Los slots especiales requieren solicitar cuatro sesiones del mes juntas.
             </small>
           </div>
         </section>
