@@ -22,15 +22,62 @@ const encounterTypes = [
 ];
 
 const modalities = [
+  { id: "online", label: "A distancia", detail: "Videollamada" },
+  { id: "cdmx", label: "CDMX", detail: "Presencial · sujeto a disponibilidad" },
+];
+
+const slotGroups = [
   {
-    id: "online",
-    label: "A distancia",
-    detail: "Videollamada",
+    id: "matutino",
+    label: "MATUTINO",
+    note: "Antes de que empiece el resto del día.",
+    slots: [
+      {
+        id: "0700",
+        time: "07:00",
+        status: "available",
+        special: true,
+        price: "$1,200 / sesión",
+        packageTotal: "$4,800",
+        packageLabel: "4 sesiones del mes",
+      },
+      { id: "1000", time: "10:00", status: "booked" },
+      { id: "1230", time: "12:30", status: "booked" },
+    ],
   },
   {
-    id: "cdmx",
-    label: "CDMX",
-    detail: "Presencial · sujeto a disponibilidad",
+    id: "vespertino",
+    label: "VESPERTINO",
+    note: "El tramo habitual de la tarde.",
+    slots: [
+      {
+        id: "1600",
+        time: "16:00",
+        status: "booked",
+        special: true,
+        price: "$1,200 / sesión",
+        packageTotal: "$4,800",
+        packageLabel: "4 sesiones del mes",
+      },
+      { id: "1730", time: "17:30", status: "booked" },
+      { id: "1900", time: "19:00", status: "available" },
+    ],
+  },
+  {
+    id: "global-access",
+    label: "GLOBAL ACCESS",
+    note: "After hours. Para quienes necesitan un horario fuera del bloque habitual.",
+    slots: [
+      {
+        id: "2230",
+        time: "22:30",
+        status: "available",
+        special: true,
+        price: "$1,500 / sesión",
+        packageTotal: "$6,000",
+        packageLabel: "4 sesiones del mes",
+      },
+    ],
   },
 ];
 
@@ -48,12 +95,13 @@ function App() {
   const [encounter, setEncounter] = useState("primera");
   const [modality, setModality] = useState("online");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [slotId, setSlotId] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
 
   const selectedEncounter = encounterTypes.find((item) => item.id === encounter);
   const selectedModality = modalities.find((item) => item.id === modality);
+  const selectedSlot = slotGroups.flatMap((group) => group.slots.map((slot) => ({ ...slot, group: group.label }))).find((slot) => slot.id === slotId);
 
   const minDate = useMemo(() => {
     const now = new Date();
@@ -63,10 +111,10 @@ function App() {
     return `${yyyy}-${mm}-${dd}`;
   }, []);
 
-  const ready = Boolean(date && time && name.trim());
+  const ready = Boolean(date && selectedSlot && name.trim());
 
   const openWhatsApp = () => {
-    if (!ready) return;
+    if (!ready || !selectedSlot) return;
 
     const lines = [
       "Hola, Dr. Rodrigo. Me gustaría solicitar un horario.",
@@ -75,12 +123,18 @@ function App() {
       `Encuentro: ${selectedEncounter.title} · ${selectedEncounter.duration}`,
       `Modalidad: ${selectedModality.label}`,
       `Fecha preferente: ${formatDate(date)}`,
-      `Hora preferente: ${time}`,
+      `Horario: ${selectedSlot.time} h · ${selectedSlot.group}`,
     ];
 
-    if (note.trim()) {
-      lines.push(`Nota: ${note.trim()}`);
+    if (selectedSlot.special) {
+      lines.push(
+        `Modalidad de agenda: ${selectedSlot.packageLabel} reservadas en conjunto`,
+        `Costo: ${selectedSlot.price}`,
+        `Total mensual: ${selectedSlot.packageTotal}`
+      );
     }
+
+    if (note.trim()) lines.push(`Nota: ${note.trim()}`);
 
     lines.push("", "Entiendo que el horario queda confirmado cuando reciba respuesta.");
 
@@ -106,13 +160,12 @@ function App() {
             <em>UNA SESIÓN.</em>
           </h1>
           <p className="hero-copy">
-            Elige el tipo de encuentro, modalidad, fecha y hora que te resulten convenientes.
-            La solicitud se confirma personalmente por WhatsApp.
+            Elige el tipo de encuentro, modalidad, fecha y un horario disponible. Algunos horarios especiales se reservan como bloque mensual.
           </p>
           <div className="hero-strip">
             <span>01 ENCUENTRO</span>
             <span>02 MODALIDAD</span>
-            <span>03 FECHA</span>
+            <span>03 FECHA + SLOT</span>
             <span>04 CONFIRMACIÓN</span>
           </div>
         </section>
@@ -121,10 +174,7 @@ function App() {
           <aside className="booking-intro">
             <span>01 / ENCUENTRO</span>
             <h2>¿QUÉ NECESITAS?</h2>
-            <p>
-              No hace falta decidirlo con precisión clínica. Sólo elige la opción que mejor describe
-              el tipo de cita que buscas.
-            </p>
+            <p>No hace falta decidirlo con precisión clínica. Elige la opción que mejor describe el tipo de cita que buscas.</p>
           </aside>
 
           <div className="booking-flow">
@@ -166,33 +216,75 @@ function App() {
 
             <div className="block">
               <div className="block-head">
-                <span>03 / FECHA Y HORA</span>
+                <span>03 / FECHA Y HORARIO</span>
                 <h3>¿CUÁNDO?</h3>
               </div>
 
-              <div className="field-grid">
-                <label>
-                  <span>FECHA PREFERENTE</span>
-                  <input
-                    type="date"
-                    min={minDate}
-                    value={date}
-                    onChange={(event) => setDate(event.target.value)}
-                  />
-                </label>
+              <label className="date-field">
+                <span>{selectedSlot?.special ? "FECHA DE INICIO PREFERENTE" : "FECHA PREFERENTE"}</span>
+                <input
+                  type="date"
+                  min={minDate}
+                  value={date}
+                  onChange={(event) => setDate(event.target.value)}
+                />
+              </label>
 
-                <label>
-                  <span>HORA PREFERENTE</span>
-                  <input
-                    type="time"
-                    value={time}
-                    onChange={(event) => setTime(event.target.value)}
-                  />
-                </label>
+              <div className="slot-groups">
+                {slotGroups.map((group) => (
+                  <section className="slot-group" key={group.id}>
+                    <div className="slot-group-head">
+                      <div>
+                        <span>{group.label}</span>
+                        <p>{group.note}</p>
+                      </div>
+                    </div>
+
+                    <div className="slot-grid">
+                      {group.slots.map((slot) => {
+                        const booked = slot.status === "booked";
+                        const selected = slotId === slot.id;
+
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            disabled={booked}
+                            className={[
+                              "slot-card",
+                              booked ? "booked" : "available",
+                              selected ? "selected" : "",
+                              slot.special ? "special" : "",
+                            ].join(" ")}
+                            onClick={() => !booked && setSlotId(slot.id)}
+                          >
+                            <div className="slot-top">
+                              <strong>{slot.time}</strong>
+                              <span>{booked ? "APARTADO" : selected ? "SELECCIONADO" : "DISPONIBLE"}</span>
+                            </div>
+
+                            {slot.special ? (
+                              <div className="slot-special-copy">
+                                <b>SLOT ESPECIAL</b>
+                                <p>{slot.price}</p>
+                                <p>Se reserva únicamente como bloque de {slot.packageLabel}.</p>
+                                <em>Total: {slot.packageTotal}</em>
+                              </div>
+                            ) : (
+                              <p className="slot-regular-copy">
+                                {booked ? "Este horario ya está reservado." : "Sesión individual disponible."}
+                              </p>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </div>
+
               <p className="microcopy">
-                Elegir una hora no la bloquea automáticamente. La disponibilidad se confirma antes
-                de considerar la cita reservada.
+                Los horarios marcados como “apartado” no pueden seleccionarse. Elegir un slot especial implica solicitar las cuatro sesiones del mes en ese mismo horario y aceptar el total mensual indicado.
               </p>
             </div>
 
@@ -235,15 +327,15 @@ function App() {
             <p>{selectedEncounter.duration}</p>
             <p>{selectedModality.label}</p>
             <p>{formatDate(date)}</p>
-            <p>{time || "Sin hora elegida"}</p>
+            <p>{selectedSlot ? `${selectedSlot.time} h · ${selectedSlot.group}` : "Sin horario elegido"}</p>
+            {selectedSlot?.special && <p>{selectedSlot.packageLabel} · {selectedSlot.packageTotal}</p>}
           </div>
           <div className="summary-action">
             <button type="button" onClick={openWhatsApp} disabled={!ready}>
               Solicitar horario por WhatsApp ↗
             </button>
             <small>
-              La cita sólo queda confirmada después de recibir respuesta. Nada de calendarios
-              fingiendo certeza metafísica donde todavía no la hay.
+              La solicitud no queda confirmada hasta recibir respuesta. En slots especiales, seleccionar el horario implica solicitar el bloque completo de cuatro sesiones del mes.
             </small>
           </div>
         </section>
@@ -251,8 +343,7 @@ function App() {
         <section className="note-section">
           <span>ANTES DE AGENDAR</span>
           <p>
-            Este formulario sirve para solicitar una cita. No es un servicio de urgencias ni sustituye
-            atención médica inmediata cuando existe una situación de riesgo.
+            Este formulario sirve para solicitar una cita. No es un servicio de urgencias ni sustituye atención médica inmediata cuando existe una situación de riesgo.
           </p>
         </section>
       </main>
