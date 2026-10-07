@@ -1,89 +1,133 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./styles/success-burst.css";
 import { SuccessBurst } from "./components/SuccessBurst";
-import { buildWhatsAppUrl } from "./lib/booking";
+import {
+  buildBookingWhatsAppUrl,
+  buildContactWhatsAppUrl,
+  buildGlobalAccessWhatsAppUrl,
+  buildWaitlistWhatsAppUrl,
+} from "./lib/booking";
 
-const encounterTypes = [
+const scheduleSections = [
   {
-    id: "primera",
-    eyebrow: "PRIMER ENCUENTRO",
-    title: "Primera sesión",
-    duration: "75 min",
-    copy: "Para conocernos, entender qué estás viviendo y decidir si este espacio tiene sentido para ti.",
-  },
-  {
-    id: "seguimiento",
-    eyebrow: "SEGUIMIENTO",
-    title: "Sesión individual",
-    duration: "60 min",
-    copy: "Para continuar un proceso ya iniciado y trabajar con atención sobre lo que está ocurriendo ahora.",
-  },
-];
-
-const modalities = [
-  { id: "online", label: "A distancia", detail: "Videollamada" },
-  { id: "cdmx", label: "CDMX", detail: "Presencial · sujeto a disponibilidad" },
-];
-
-const slotGroups = [
-  {
-    id: "matutino",
-    label: "MATUTINO",
-    note: "Para empezar el día con un espacio propio.",
+    id: "manana",
+    eyebrow: "MAÑANA",
+    note: "Antes de que empiece el resto del día.",
     slots: [
       {
         id: "0700",
-        time: "07:00",
+        time: "7:00 h",
+        title: "Primera hora",
+        description:
+          "Para quienes prefieren empezar temprano y dejar este espacio protegido antes de entrar en la jornada.",
         status: "available",
-        special: true,
-        price: "$1,200 / sesión",
-        packageTotal: "$4,800",
-        packageLabel: "4 sesiones del mes",
+        statusLabel: "Disponible",
+        fixed: true,
+        priceLabel: "4 sesiones · $4,800 al mes",
+        cost: "$4,800 al mes",
+        sessionCost: "$1,200 por sesión",
+        cta: "Disponible",
       },
-      { id: "1000", time: "10:00", status: "booked" },
-      { id: "1230", time: "12:30", status: "booked" },
+      {
+        id: "1000",
+        time: "10:00 h",
+        description: "Una sesión a media mañana, con tiempo para continuar tu día después.",
+        status: "booked",
+        statusLabel: "Completo por ahora",
+        fixed: false,
+        priceLabel: "Sesión · $900",
+        cost: "$900",
+        cta: "Avísame si se libera",
+      },
+      {
+        id: "1230",
+        time: "12:30 h",
+        description: "Para hacer una pausa antes de continuar con el resto de tus actividades.",
+        status: "booked",
+        statusLabel: "Completo por ahora",
+        fixed: false,
+        priceLabel: "Sesión · $900",
+        cost: "$900",
+        cta: "Avísame si se libera",
+      },
     ],
   },
   {
-    id: "vespertino",
-    label: "VESPERTINO",
-    note: "La tarde también puede tener su propio espacio.",
+    id: "tarde",
+    eyebrow: "TARDE",
+    note: "Un espacio entre todo lo demás.",
     slots: [
       {
         id: "1600",
-        time: "16:00",
+        time: "16:00 h",
+        title: "Media tarde",
+        description:
+          "Un horario reservado para tener continuidad sin llevar la sesión hasta el final del día.",
         status: "booked",
-        special: true,
-        price: "$1,200 / sesión",
-        packageTotal: "$4,800",
-        packageLabel: "4 sesiones del mes",
+        statusLabel: "Completo por ahora",
+        fixed: true,
+        priceLabel: "4 sesiones · $4,800 al mes",
+        cost: "$4,800 al mes",
+        sessionCost: "$1,200 por sesión",
+        cta: "Avísame si se libera",
       },
-      { id: "1730", time: "17:30", status: "booked" },
-      { id: "1900", time: "19:00", status: "available" },
+      {
+        id: "1730",
+        time: "17:30 h",
+        description:
+          "Para terminar la tarde con un espacio propio antes de seguir con el resto del día.",
+        status: "booked",
+        statusLabel: "Completo por ahora",
+        fixed: false,
+        priceLabel: "Sesión · $900",
+        cost: "$900",
+        cta: "Avísame si se libera",
+      },
+      {
+        id: "1900",
+        time: "19:00 h",
+        description:
+          "Cuando la jornada empieza a bajar de ritmo y puedes llegar a sesión con un poco más de espacio.",
+        status: "available",
+        statusLabel: "Disponible",
+        fixed: false,
+        priceLabel: "Sesión · $900",
+        cost: "$900",
+        cta: "Reservar",
+      },
     ],
   },
   {
-    id: "global-access",
-    label: "GLOBAL ACCESS",
-    note: "After hours · Una opción fuera del horario habitual.",
+    id: "after-hours",
+    eyebrow: "AFTER HOURS",
+    note: "Para quienes terminan el día más tarde.",
     slots: [
       {
         id: "2230",
-        time: "22:30",
+        time: "22:30 h",
+        description:
+          "No todos los horarios caben entre las nueve y las seis. After Hours es un espacio nocturno reservado para personas cuya jornada, responsabilidades o rutina hacen difícil acudir en horarios convencionales.",
         status: "available",
-        special: true,
-        price: "$1,500 / sesión",
-        packageTotal: "$6,000",
-        packageLabel: "4 sesiones del mes",
+        statusLabel: "Disponible",
+        fixed: true,
+        priceLabel: "4 sesiones · $6,000 al mes",
+        cost: "$6,000 al mes",
+        sessionCost: "$1,500 por sesión",
+        cta: "Reservar",
+        wide: true,
       },
     ],
   },
 ];
 
+const allSlots = scheduleSections.flatMap((section) =>
+  section.slots.map((slot) => ({ ...slot, section: section.eyebrow }))
+);
+
 function formatDate(date) {
-  if (!date) return "Sin fecha elegida";
+  if (!date) return "Por elegir";
   return new Intl.DateTimeFormat("es-MX", {
     weekday: "long",
     day: "numeric",
@@ -92,19 +136,25 @@ function formatDate(date) {
   }).format(new Date(`${date}T12:00:00`));
 }
 
+function ArrowIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
 function App() {
-  const [encounter, setEncounter] = useState("primera");
-  const [modality, setModality] = useState("online");
+  const [selectedSlotId, setSelectedSlotId] = useState("");
   const [date, setDate] = useState("");
-  const [slotId, setSlotId] = useState("");
-  const [name, setName] = useState("");
-  const [note, setNote] = useState("");
-  const [prepared, setPrepared] = useState(false);
+  const [modality, setModality] = useState("online");
+  const [confirmed, setConfirmed] = useState(false);
   const [burst, setBurst] = useState({ id: 0, active: false });
 
-  const selectedEncounter = encounterTypes.find((item) => item.id === encounter);
-  const selectedModality = modalities.find((item) => item.id === modality);
-  const selectedSlot = slotGroups.flatMap((group) => group.slots.map((slot) => ({ ...slot, group: group.label }))).find((slot) => slot.id === slotId);
+  const sessionRef = useRef(null);
+  const successRef = useRef(null);
+
+  const selectedSlot = allSlots.find((slot) => slot.id === selectedSlotId);
 
   const minDate = useMemo(() => {
     const now = new Date();
@@ -114,22 +164,32 @@ function App() {
     return `${yyyy}-${mm}-${dd}`;
   }, []);
 
-  const ready = Boolean(date && selectedSlot && name.trim());
+  const ready = Boolean(selectedSlot && date && modality);
 
-  const requestUrl = ready
-    ? buildWhatsAppUrl({
-        name,
-        encounter: selectedEncounter,
-        modality: selectedModality,
-        formattedDate: formatDate(date),
-        slot: selectedSlot,
-        note,
-      })
-    : "";
+  const selectSlot = (slot) => {
+    setSelectedSlotId(slot.id);
+    setConfirmed(false);
+    requestAnimationFrame(() => {
+      sessionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
-  const prepareRequest = () => {
-    setPrepared(true);
+  const confirmSession = () => {
+    if (!ready || !selectedSlot) return;
+
+    const url = buildBookingWhatsAppUrl({
+      formattedDate: formatDate(date),
+      modality: modality === "online" ? "En línea" : "Presencial",
+      slot: selectedSlot,
+    });
+
+    window.open(url, "_blank", "noopener,noreferrer");
+    setConfirmed(true);
     setBurst((previous) => ({ id: previous.id + 1, active: true }));
+
+    requestAnimationFrame(() => {
+      successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   };
 
   return (
@@ -139,232 +199,314 @@ function App() {
           <img src="/elsewhere-mark.svg" alt="" aria-hidden="true" />
         </a>
         <div className="topbar-title">AGENDA</div>
-        <div className="topbar-meta">RODRIGO GUTIÉRREZ-VÁSQUEZ</div>
+        <div className="topbar-meta">DR. RODRIGO GUTIÉRREZ VÁSQUEZ</div>
       </header>
 
       <main id="top">
-        <section className="hero">
-          <div className="hero-kicker">CONSULTA · PSICOTERAPIA</div>
-          <h1>
-            AGENDA
-            <em>UNA SESIÓN.</em>
-          </h1>
-          <p className="hero-copy">
-            Una conversación empieza por encontrar un espacio. Elige tu horario; nosotros confirmamos personalmente los detalles.
-          </p>
-          <div className="hero-strip">
-            <span>01 ENCUENTRO</span>
-            <span>02 MODALIDAD</span>
-            <span>03 HORARIO</span>
-            <span>04 SOLICITUD</span>
+        <section className="intro-hero">
+          <div className="intro-kicker">PSICOTERAPIA · CDMX / EN LÍNEA</div>
+          <div className="intro-grid">
+            <h1>
+              Agenda
+              <br />
+              <em>tu sesión</em>
+            </h1>
+            <div className="intro-copy">
+              <p>
+                A veces necesitas trabajar algo que lleva tiempo contigo. Otras, ordenar una decisión,
+                atravesar un cambio o simplemente tener un espacio para detenerte y entender mejor cómo estás.
+              </p>
+              <p>La psicoterapia puede servir para ambas cosas.</p>
+              <p>Aquí puedes elegir el horario que mejor se adapte a tu día.</p>
+            </div>
+          </div>
+
+          <div className="clinician-card">
+            <div>
+              <strong>Dr. Rodrigo Gutiérrez Vásquez</strong>
+              <span>Médico psicoterapeuta · Psicoterapia basada en evidencia</span>
+            </div>
+            <b>50 min · Presencial o en línea</b>
           </div>
         </section>
 
-        <section className="booking">
-          <aside className="booking-intro">
-            <span>01 / ENCUENTRO</span>
-            <h2>¿QUÉ NECESITAS?</h2>
-            <p>Un espacio para comenzar o continuar. Elige el tipo de encuentro que corresponde a tu proceso.</p>
-          </aside>
+        <section className="schedule-section" id="horarios">
+          <div className="section-heading">
+            <span>HORARIOS</span>
+            <div>
+              <h2>Elige tu horario</h2>
+              <p>Busca un espacio que puedas sostener con calma, sin tener que correr de una cosa a otra.</p>
+            </div>
+          </div>
 
-          <div className="booking-flow">
-            <div className="choice-grid">
-              {encounterTypes.map((item) => (
-                <button
-                  key={item.id}
-                  className={encounter === item.id ? "choice-card active" : "choice-card"}
-                  onClick={() => { setEncounter(item.id); setPrepared(false); }}
-                  aria-pressed={encounter === item.id}
-                  type="button"
-                >
-                  <span>{item.eyebrow}</span>
-                  <strong>{item.title}</strong>
-                  <b>{item.duration}</b>
-                  <p>{item.copy}</p>
-                </button>
-              ))}
+          <div className="schedule-groups">
+            {scheduleSections.map((section) => (
+              <section className={"time-band time-band-" + section.id} key={section.id}>
+                <div className="time-band-head">
+                  <h3>{section.eyebrow}</h3>
+                  <p>{section.note}</p>
+                </div>
+
+                <div className={"schedule-grid" + (section.id === "after-hours" ? " schedule-grid-single" : "")}>
+                  {section.slots.map((slot) => {
+                    const available = slot.status === "available";
+                    const selected = selectedSlotId === slot.id;
+
+                    return (
+                      <article
+                        className={[
+                          "schedule-card",
+                          available ? "is-available" : "is-booked",
+                          selected ? "is-selected" : "",
+                          slot.fixed ? "is-fixed" : "",
+                          slot.wide ? "is-wide" : "",
+                        ].join(" ")}
+                        key={slot.id}
+                      >
+                        <div className="slot-header">
+                          <div>
+                            <h4>
+                              {slot.time}
+                              {slot.title && <span> · {slot.title}</span>}
+                            </h4>
+                            <p>{slot.description}</p>
+                          </div>
+                          <span className={"status-pill " + (available ? "available" : "booked")}>
+                            {slot.statusLabel}
+                          </span>
+                        </div>
+
+                        <div className="slot-meta">
+                          {slot.fixed && <span>HORARIO FIJO MENSUAL</span>}
+                          <strong>{slot.priceLabel}</strong>
+                          {slot.sessionCost && <small>{slot.sessionCost}</small>}
+                        </div>
+
+                        {available ? (
+                          <button
+                            className="slot-action primary"
+                            type="button"
+                            onClick={() => selectSlot(slot)}
+                          >
+                            <span>{slot.cta}</span>
+                            <ArrowIcon />
+                          </button>
+                        ) : (
+                          <a
+                            className="slot-action secondary"
+                            href={buildWaitlistWhatsAppUrl(slot)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span>{slot.cta}</span>
+                            <ArrowIcon />
+                          </a>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        </section>
+
+        <section className="global-access-section">
+          <div className="global-access-label">GLOBAL ACCESS</div>
+          <div className="global-access-copy">
+            <h2>Psicoterapia en línea, aunque tu reloj esté en otra parte.</h2>
+            <p>
+              Si vives fuera de México, viajas con frecuencia o tu zona horaria no coincide con los horarios
+              publicados, podemos buscar un espacio que funcione para ambos.
+            </p>
+            <p>
+              Cuéntame desde dónde te conectarías y en qué momentos del día tienes mayor disponibilidad.
+            </p>
+            <a
+              className="global-access-action"
+              href={buildGlobalAccessWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>Solicitar Global Access</span>
+              <ArrowIcon />
+            </a>
+          </div>
+        </section>
+
+        <section className="before-section">
+          <div className="section-heading compact">
+            <span>ANTES DE RESERVAR</span>
+            <div>
+              <h2>Dos cosas que conviene saber.</h2>
+            </div>
+          </div>
+
+          <div className="before-grid">
+            <article>
+              <span>01</span>
+              <h3>Horario fijo mensual</h3>
+              <p>
+                Algunos horarios se reservan de manera mensual para poder mantenerlos disponibles
+                exclusivamente para ti.
+              </p>
+              <p>
+                Al elegir uno de estos espacios se reservan <strong>cuatro sesiones</strong>.
+              </p>
+              <p>Podrás revisar las fechas antes de confirmar.</p>
+            </article>
+
+            <article>
+              <span>02</span>
+              <h3>Si un horario está completo</h3>
+              <p>Puedes dejar tus datos y te avisaremos si vuelve a estar disponible.</p>
+              <p>
+                Sin listas misteriosas ni compromisos. Si se libera, decides en ese momento si todavía te funciona.
+              </p>
+              <a
+                className="text-action"
+                href={buildWaitlistWhatsAppUrl({ time: "cualquier horario" })}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Avísame si se libera <ArrowIcon />
+              </a>
+            </article>
+          </div>
+        </section>
+
+        <section className="session-section" ref={sessionRef}>
+          <div className="session-shell">
+            <div className="session-heading">
+              <span>TU SESIÓN</span>
+              <h2>Revisa antes de confirmar.</h2>
             </div>
 
-            <div className="block">
-              <div className="block-head">
-                <span>02 / MODALIDAD</span>
-                <h3>¿DÓNDE?</h3>
-              </div>
-              <div className="modality-grid">
-                {modalities.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={modality === item.id ? "modality active" : "modality"}
-                    onClick={() => { setModality(item.id); setPrepared(false); }}
-                    aria-pressed={modality === item.id}
-                  >
-                    <span>{item.label}</span>
-                    <small>{item.detail}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="block">
-              <div className="block-head">
-                <span>03 / FECHA Y HORARIO</span>
-                <h3>¿CUÁNDO?</h3>
-              </div>
-
-              <label className="date-field">
-                <span>{selectedSlot?.special ? "FECHA DE INICIO PREFERENTE" : "FECHA PREFERENTE"}</span>
+            <div className="session-controls">
+              <label className="date-control">
+                <span>FECHA</span>
                 <input
                   type="date"
                   min={minDate}
                   value={date}
-                  onChange={(event) => { setDate(event.target.value); setPrepared(false); }}
+                  onChange={(event) => {
+                    setDate(event.target.value);
+                    setConfirmed(false);
+                  }}
                 />
               </label>
 
-              <div className="slot-groups">
-                {slotGroups.map((group) => (
-                  <section className="slot-group" key={group.id}>
-                    <div className="slot-group-head">
-                      <div>
-                        <span>{group.label}</span>
-                        <p>{group.note}</p>
-                      </div>
-                    </div>
-
-                    <div className="slot-grid">
-                      {group.slots.map((slot) => {
-                        const booked = slot.status === "booked";
-                        const selected = slotId === slot.id;
-
-                        return (
-                          <button
-                            key={slot.id}
-                            type="button"
-                            disabled={booked}
-                            className={[
-                              "slot-card",
-                              booked ? "booked" : "available",
-                              selected ? "selected" : "",
-                              slot.special ? "special" : "",
-                            ].join(" ")}
-                            onClick={() => { if (!booked) { setSlotId(slot.id); setPrepared(false); } }}
-                            aria-pressed={selected}
-                          >
-                            <div className="slot-top">
-                              <strong>{slot.time}</strong>
-                              <span>{booked ? "APARTADO" : selected ? "SELECCIONADO" : "DISPONIBLE"}</span>
-                            </div>
-
-                            {slot.special ? (
-                              <div className="slot-special-copy">
-                                <b>SLOT ESPECIAL</b>
-                                <p>{slot.price}</p>
-                                <p>Se reserva únicamente como bloque de {slot.packageLabel}.</p>
-                                <em>Total: {slot.packageTotal}</em>
-                              </div>
-                            ) : (
-                              <p className="slot-regular-copy">
-                                {booked ? "Este horario ya está reservado." : "Sesión individual disponible."}
-                              </p>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
-                ))}
+              <div className="modality-control">
+                <span>MODALIDAD</span>
+                <div className="segmented">
+                  <button
+                    type="button"
+                    className={modality === "online" ? "active" : ""}
+                    onClick={() => {
+                      setModality("online");
+                      setConfirmed(false);
+                    }}
+                    aria-pressed={modality === "online"}
+                  >
+                    En línea
+                  </button>
+                  <button
+                    type="button"
+                    className={modality === "presencial" ? "active" : ""}
+                    onClick={() => {
+                      setModality("presencial");
+                      setConfirmed(false);
+                    }}
+                    aria-pressed={modality === "presencial"}
+                  >
+                    Presencial
+                  </button>
+                </div>
               </div>
+            </div>
 
-              <p className="microcopy">
-                Los horarios apartados no se pueden seleccionar. Los slots especiales implican solicitar las cuatro sesiones del mes y el total indicado.
+            <div className="session-summary">
+              <div>
+                <span>FECHA</span>
+                <strong>{formatDate(date)}</strong>
+              </div>
+              <div>
+                <span>HORA</span>
+                <strong>{selectedSlot?.time || "Elige un horario"}</strong>
+              </div>
+              <div>
+                <span>MODALIDAD</span>
+                <strong>{modality === "online" ? "En línea" : "Presencial"}</strong>
+              </div>
+              <div>
+                <span>COSTO</span>
+                <strong>{selectedSlot?.cost || "Por definir"}</strong>
+              </div>
+            </div>
+
+            {selectedSlot?.fixed && (
+              <p className="fixed-note">
+                Este es un horario fijo mensual. Al confirmarlo solicitas cuatro sesiones y podrás revisar
+                las fechas del mes antes de finalizar.
               </p>
-            </div>
+            )}
 
-            <div className="block">
-              <div className="block-head">
-                <span>04 / TUS DATOS</span>
-                <h3>¿A NOMBRE DE QUIÉN?</h3>
-              </div>
-
-              <div className="field-grid single">
-                <label>
-                  <span>NOMBRE</span>
-                  <input
-                    type="text"
-                    placeholder="Tu nombre"
-                    autoComplete="name"
-                    value={name}
-                    onChange={(event) => { setName(event.target.value); setPrepared(false); }}
-                  />
-                </label>
-
-                <label>
-                  <span>NOTA OPCIONAL</span>
-                  <textarea
-                    rows="4"
-                    placeholder="Algo que convenga saber antes de confirmar."
-                    value={note}
-                    onChange={(event) => { setNote(event.target.value); setPrepared(false); }}
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="summary-section">
-          <div className="summary-label">RESUMEN</div>
-          <div className="summary-main">
-            <p>{selectedEncounter.title}</p>
-            <p>{selectedEncounter.duration}</p>
-            <p>{selectedModality.label}</p>
-            <p>{formatDate(date)}</p>
-            <p>{selectedSlot ? `${selectedSlot.time} h · ${selectedSlot.group}` : "Sin horario elegido"}</p>
-            {selectedSlot?.special && <p>{selectedSlot.packageLabel} · {selectedSlot.packageTotal}</p>}
-          </div>
-          <div className="summary-action">
-            <div className="request-wrap">
-              {ready ? (
-                <a className="request-link" href={requestUrl} target="_blank" rel="noopener noreferrer" onClick={prepareRequest}>
-                  <span>Continuar en WhatsApp</span>
-                  <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </a>
-              ) : (
-                <button type="button" className="request-link" disabled>
-                  <span>Completa tu solicitud</span>
-                  <span aria-hidden="true">→</span>
-                </button>
-              )}
+            <div className="confirm-wrap">
+              <button className="confirm-button" type="button" onClick={confirmSession} disabled={!ready}>
+                <span>{ready ? "Confirmar sesión" : "Elige fecha y horario"}</span>
+                <ArrowIcon />
+              </button>
               {burst.active && (
-                <SuccessBurst key={burst.id} onComplete={() => setBurst((previous) => ({ ...previous, active: false }))} />
+                <SuccessBurst
+                  key={burst.id}
+                  onComplete={() => setBurst((previous) => ({ ...previous, active: false }))}
+                />
               )}
+              <small>
+                Al confirmar se abrirá WhatsApp con los datos de tu solicitud para completar la reserva.
+              </small>
             </div>
-            <p className={"request-feedback" + (prepared ? " is-prepared" : "")} role="status" aria-live="polite">
-              {prepared
-                ? "Solicitud preparada. Revisa el mensaje en WhatsApp y pulsa enviar."
-                : "No se realiza ningún cobro ni se aparta el horario desde esta página."}
-            </p>
-            <small>
-              La cita se confirma personalmente después de recibir tu mensaje. Los slots especiales requieren solicitar cuatro sesiones del mes juntas.
-            </small>
           </div>
         </section>
 
-        <section className="note-section">
-          <span>ANTES DE AGENDAR</span>
-          <p>
-            Este formulario sirve para solicitar una cita. No es un servicio de urgencias ni sustituye atención médica inmediata cuando existe una situación de riesgo.
-          </p>
+        <section className={"success-section" + (confirmed ? " is-visible" : "")} ref={successRef} aria-live="polite">
+          <div className="success-mark" aria-hidden="true">✓</div>
+          <div>
+            <span>LISTO</span>
+            <h2>Tu sesión está reservada.</h2>
+            <p>Recibirás la información necesaria para conectarte o acudir al consultorio.</p>
+            <p>No necesitas preparar una explicación perfecta de lo que te pasa.</p>
+            <p className="success-closing">Empezamos desde donde estés.</p>
+          </div>
+        </section>
+
+        <section className="closing-section">
+          <article>
+            <span>SI ES TU PRIMERA SESIÓN</span>
+            <p>
+              Puedes llegar con una idea muy clara de lo que quieres trabajar o simplemente con la sensación
+              de que algo merece atención.
+            </p>
+            <p>Ambas son buenas maneras de empezar.</p>
+          </article>
+
+          <article>
+            <span>SI ESTÁS PASANDO POR UN MOMENTO ESPECIALMENTE DIFÍCIL</span>
+            <p>
+              Si necesitas atención en poco tiempo o no estás seguro de que una cita ordinaria sea suficiente
+              para lo que estás viviendo, escríbeme antes de reservar.
+            </p>
+            <a className="text-action" href={buildContactWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              Contactar <ArrowIcon />
+            </a>
+          </article>
         </section>
       </main>
 
       <footer>
         <img src="/elsewhere-mark.svg" alt="" aria-hidden="true" />
-        <p>RODRIGO GUTIÉRREZ-VÁSQUEZ · MÉDICO PSICOTERAPEUTA</p>
-        <p>CDMX · 2026</p>
+        <p>Psicoterapia presencial y en línea</p>
+        <p>Dr. Rodrigo Gutiérrez Vásquez · Médico psicoterapeuta</p>
       </footer>
     </div>
   );
