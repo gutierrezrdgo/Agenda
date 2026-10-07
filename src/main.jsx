@@ -333,24 +333,36 @@ function App() {
 
             <div className="credentials-list">
               <article>
-                <span>MEDICINA</span>
-                <strong>Universidad Durango Santander · Sonora</strong>
-                <small>Cédula profesional 12527781</small>
+                <img className="credential-logo" src="/institutions/universidad-durango-santander.webp" alt="Universidad Durango Santander" />
+                <div className="credential-copy">
+                  <span>MEDICINA</span>
+                  <strong>Universidad Durango Santander · Sonora</strong>
+                  <small>Cédula profesional 12527781</small>
+                </div>
               </article>
               <article>
-                <span>CLÍNICA COGNITIVO-CONDUCTUAL</span>
-                <strong>Universidad de Monterrey</strong>
-                <small>Cédula 14950386</small>
+                <img className="credential-logo" src="/institutions/universidad-de-monterrey.webp" alt="Universidad de Monterrey" />
+                <div className="credential-copy">
+                  <span>CLÍNICA COGNITIVO-CONDUCTUAL</span>
+                  <strong>Universidad de Monterrey</strong>
+                  <small>Cédula 14950386</small>
+                </div>
               </article>
               <article>
-                <span>NEUROCIENCIAS</span>
-                <strong>Universitat Autònoma de Barcelona</strong>
-                <small>Máster Universitario en Psicobiología y Neurociencia Cognitiva</small>
+                <img className="credential-logo" src="/institutions/universitat-autonoma-de-barcelona.webp" alt="Universitat Autònoma de Barcelona" />
+                <div className="credential-copy">
+                  <span>NEUROCIENCIAS</span>
+                  <strong>Universitat Autònoma de Barcelona</strong>
+                  <small>Máster Universitario en Psicobiología y Neurociencia Cognitiva</small>
+                </div>
               </article>
               <article>
-                <span>ACTUALIZACIÓN PROFESIONAL</span>
-                <strong>Consejo Mexicano de Neurociencias</strong>
-                <small>Miembro activo</small>
+                <img className="credential-logo" src="/institutions/consejo-mexicano-de-neurociencias.webp" alt="Consejo Mexicano de Neurociencias" />
+                <div className="credential-copy">
+                  <span>ACTUALIZACIÓN PROFESIONAL</span>
+                  <strong>Consejo Mexicano de Neurociencias</strong>
+                  <small>Miembro activo</small>
+                </div>
               </article>
             </div>
           </div>
