@@ -217,7 +217,11 @@ function App() {
                 atravesar un cambio o simplemente tener un espacio para detenerte y entender mejor cómo estás.
               </p>
               <p>La psicoterapia puede servir para ambas cosas.</p>
-              <p>Aquí puedes elegir el horario que mejor se adapte a tu día.</p>
+              <p>Aquí puedes conocer cómo trabajo y elegir el horario que mejor se adapte a tu día.</p>
+              <a className="hero-cta" href="#horarios">
+                <span>Ver horarios disponibles</span>
+                <ArrowIcon />
+              </a>
             </div>
           </div>
 
@@ -227,6 +231,146 @@ function App() {
               <span>Médico psicoterapeuta · Psicoterapia basada en evidencia</span>
             </div>
             <b>50 min · Presencial o en línea</b>
+          </div>
+        </section>
+
+        <section className="landing-section" id="sobre-mi">
+          <div className="landing-heading">
+            <span>PSICOTERAPIA PARA ADULTOS</span>
+            <div>
+              <h2>Un espacio para entender lo que estás viviendo y trabajar sobre ello.</h2>
+              <p className="landing-lead">
+                Soy médico y psicoterapeuta. Mi formación integra medicina, psicología clínica
+                cognitivo-conductual y neurociencias cognitivas.
+              </p>
+              <p>
+                Trabajo con adultos que quieren comprender mejor lo que les está pasando y encontrar
+                formas de responder que tengan sentido en su vida cotidiana, no sólo dentro de la sesión.
+              </p>
+            </div>
+          </div>
+
+          <div className="concerns-grid">
+            <article>
+              <span>01</span>
+              <h3>Cuando algo pesa demasiado</h3>
+              <p>
+                Ansiedad, estrés, ánimo bajo, insomnio, preocupación constante o la sensación de estar
+                funcionando por fuera mientras por dentro todo requiere demasiado esfuerzo.
+              </p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Cuando algo está cambiando</h3>
+              <p>
+                Decisiones importantes, cambios de trabajo, pérdidas, nuevas etapas de vida o momentos en
+                los que lo que antes funcionaba ya no alcanza.
+              </p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Cuando la relación con otros se complica</h3>
+              <p>
+                Pareja, familia, límites, distancia, conflicto o conversaciones que se han vuelto difíciles
+                de tener sin terminar exactamente en el mismo lugar.
+              </p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Cuando cuidar tu salud también implica cambiar hábitos</h3>
+              <p>
+                También acompaño a personas con diabetes, hipertensión, obesidad o colesterol elevado para
+                trabajar hábitos, adherencia y autocuidado de la mano de sus especialistas.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section className="approach-section">
+          <div className="approach-label">CÓMO TRABAJO</div>
+          <div className="approach-copy">
+            <h2>La terapia no empieza por darte una receta para vivir mejor.</h2>
+            <div className="approach-columns">
+              <p>
+                Empezamos por entender qué estás viviendo, qué lo mantiene, qué has intentado hasta ahora y
+                qué está teniendo un costo en tu vida. A partir de ahí construimos objetivos concretos y
+                revisamos qué cambios vale la pena probar.
+              </p>
+              <p>
+                Trabajo desde psicoterapia cognitivo-conductual y enfoques contextuales basados en evidencia.
+                Eso puede incluir observar patrones, practicar habilidades, cambiar hábitos o aprender a
+                relacionarte de otra manera con pensamientos y emociones difíciles.
+              </p>
+              <p>
+                No necesitas llegar con un diagnóstico, una explicación perfecta ni una meta formulada como
+                proyecto corporativo trimestral. Podemos empezar por lo que hoy te resulta difícil.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="profile-section">
+          <div className="profile-heading">
+            <span>DR. RODRIGO GUTIÉRREZ VÁSQUEZ</span>
+            <h2>Médico psicoterapeuta con formación en neurociencias.</h2>
+          </div>
+
+          <div className="profile-grid">
+            <div className="profile-copy">
+              <p>
+                Mi trabajo clínico combina una mirada médica con herramientas psicológicas orientadas a
+                comprender conducta, emociones, aprendizaje y contexto.
+              </p>
+              <p>
+                La intención no es reducir lo que te ocurre a una etiqueta ni convertir cada dificultad en
+                una enfermedad. Es entenderla con suficiente precisión para poder hacer algo distinto con ella.
+              </p>
+              <a className="profile-cta" href="#horarios">
+                <span>Ir a horarios</span>
+                <ArrowIcon />
+              </a>
+            </div>
+
+            <div className="credentials-list">
+              <article>
+                <span>MEDICINA</span>
+                <strong>Universidad Durango Santander · Sonora</strong>
+                <small>Cédula profesional 12527781</small>
+              </article>
+              <article>
+                <span>CLÍNICA COGNITIVO-CONDUCTUAL</span>
+                <strong>Universidad de Monterrey</strong>
+                <small>Cédula 14950386</small>
+              </article>
+              <article>
+                <span>NEUROCIENCIAS</span>
+                <strong>Universitat Autònoma de Barcelona</strong>
+                <small>Máster Universitario en Psicobiología y Neurociencia Cognitiva</small>
+              </article>
+              <article>
+                <span>ACTUALIZACIÓN PROFESIONAL</span>
+                <strong>Consejo Mexicano de Neurociencias</strong>
+                <small>Miembro activo</small>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section className="session-format-section">
+          <div>
+            <span>SESIONES</span>
+            <strong>50 min</strong>
+            <p>Un espacio clínico individual para adultos.</p>
+          </div>
+          <div>
+            <span>MODALIDAD</span>
+            <strong>Presencial o en línea</strong>
+            <p>CDMX o videollamada, según el horario disponible.</p>
+          </div>
+          <div>
+            <span>PRIMERA SESIÓN</span>
+            <strong>Empezamos por donde estés</strong>
+            <p>No necesitas saber exactamente qué decir ni tener claro todavía qué nombre ponerle.</p>
           </div>
         </section>
 
