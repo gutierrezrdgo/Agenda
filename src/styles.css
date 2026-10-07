@@ -1102,3 +1102,42 @@ footer img { width: 46px; height: 46px; }
     transform: none !important;
   }
 }
+
+
+/* Institutional credentials */
+.credentials-list article {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+}
+.credential-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: .92;
+}
+.credential-copy {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+.credentials-list .credential-copy span {
+  grid-row: auto;
+}
+.credentials-list .credential-copy strong,
+.credentials-list .credential-copy small {
+  display: block;
+}
+
+@media (max-width: 620px) {
+  .credentials-list article {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .credential-logo {
+    width: 48px;
+    height: 48px;
+  }
+}
