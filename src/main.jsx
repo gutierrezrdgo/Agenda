@@ -253,34 +253,34 @@ function App() {
           <div className="concerns-grid">
             <article>
               <span>01</span>
-              <h3>Cuando algo pesa demasiado</h3>
+              <h3>Cuando todo empieza a pesar más de la cuenta</h3>
               <p>
-                Ansiedad, estrés, ánimo bajo, insomnio, preocupación constante o la sensación de estar
-                funcionando por fuera mientras por dentro todo requiere demasiado esfuerzo.
+                Ansiedad, estrés, ánimo bajo, insomnio o una mente que no termina de apagarse. A veces no
+                hay una sola causa; simplemente llevas demasiado tiempo sosteniendo demasiado.
               </p>
             </article>
             <article>
               <span>02</span>
-              <h3>Cuando algo está cambiando</h3>
+              <h3>Cuando estás entre una etapa y la siguiente</h3>
               <p>
-                Decisiones importantes, cambios de trabajo, pérdidas, nuevas etapas de vida o momentos en
-                los que lo que antes funcionaba ya no alcanza.
+                Cambiar de trabajo, perder algo importante, tomar una decisión o empezar de nuevo puede mover
+                más de lo que parece. Podemos ordenar lo que estás viviendo sin apresurarte a tener todas las respuestas.
               </p>
             </article>
             <article>
               <span>03</span>
-              <h3>Cuando la relación con otros se complica</h3>
+              <h3>Cuando con los demás siempre terminan en el mismo lugar</h3>
               <p>
-                Pareja, familia, límites, distancia, conflicto o conversaciones que se han vuelto difíciles
-                de tener sin terminar exactamente en el mismo lugar.
+                Pareja, familia, límites, distancia o conversaciones que se repiten. No se trata de decidir
+                quién tiene razón, sino de entender qué está pasando y qué puedes hacer distinto.
               </p>
             </article>
             <article>
               <span>04</span>
-              <h3>Cuando cuidar tu salud también implica cambiar hábitos</h3>
+              <h3>Cuando cuidar tu salud también tiene que caber en tu vida</h3>
               <p>
-                También acompaño a personas con diabetes, hipertensión, obesidad o colesterol elevado para
-                trabajar hábitos, adherencia y autocuidado de la mano de sus especialistas.
+                Si vives con diabetes, hipertensión, obesidad o colesterol elevado, podemos trabajar hábitos,
+                adherencia y autocuidado para que el tratamiento encaje mejor en tu día a día, de la mano de tus especialistas.
               </p>
             </article>
           </div>
